@@ -17,14 +17,15 @@ init_tower:
 peek_tower:
   movl (%rdi),%ecx
   cmpl $0, %ecx
-  jz peek_empty
+  jz .peek_empty
   dec %ecx
   movq 4(%rdi, %rcx, 4), %rax
   ret
-peek_empty:
+.peek_empty:
   movl $100000, %eax
   ret
 
+### like peek tower, but remove the value
 pop_tower:
   movl (%rdi),%ebx
   dec %ebx
@@ -107,6 +108,7 @@ print_even:
 
 ### rdi and rsi should be towers to move between
 move_tower:
+  ##  compare the top rings in the two towers
   mov %rdi, %r9
   call peek_tower
   mov %rax, %r10
@@ -114,14 +116,14 @@ move_tower:
   call peek_tower
   mov %r9, %rdi
   cmp %rax, %r10
-  jl less_branch
-greater_branch:
-  // swap rsi and rdi
+  jl .less_branch
+.greater_branch:
+  ## swap rdi and rsi
   mov %rdi, %rax
   mov %rsi, %rdi
   mov %rax, %rsi
-less_branch:
-  // source is rdi, dest is rsi
+.less_branch:
+  ## source is rdi, dest is rsi
   call pop_tower
   push %rdi
   push %rsi
@@ -165,25 +167,20 @@ solve:
 
   call print_all                # print them all
 
-  // calculate the loop count, and push it onto the stack
-  // this is known to be: (1<<N) - 1
-  mov (%rbp), %cl
-  movl $1, %eax
-  shl %cl, %rax
-  dec %eax
-
-  mov %rax, %r14
-  mov $0, %r15
-  push %rax
+  mov (%rbp), %cl               # copy N into %cl
+  mov $1, %r14                  # shift operand
+  shl %cl, %r14                 # 1 << N
+  dec %r14                      # now %r14 holds (1<<N)-1
+  xor %r15,%r15                 # the loop variable
 
 .solve_loop:
-  lea -64(%rbp), %rdi
-  lea -192(%rbp), %rsi
+  lea -64(%rbp), %rdi           # A tower
+  lea -192(%rbp), %rsi          # D tower
   call move_tower
 
-  inc %r15
-  cmp %r14, %r15
-  jge .leave_solve
+  inc %r15                      # increase loop counter
+  cmp %r14, %r15                # compare to loop end
+  jge .leave_solve              # leave if done
 
   lea -64(%rbp), %rdi
   lea -128(%rbp), %rsi

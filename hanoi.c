@@ -37,6 +37,7 @@ void print_tower(struct tower *tower, char name) {
   putchar('\n');
 }
 
+// return the value of the top ring
 int peek(struct tower *tower) {
   if (tower->size) {
     return tower->stack[tower->size - 1];
@@ -44,6 +45,7 @@ int peek(struct tower *tower) {
   return INT_MAX;
 }
 
+// remove the top ring and return its value
 int pop(struct tower *tower) {
   assert(tower->size);
   int val = tower->stack[tower->size - 1];
@@ -52,11 +54,13 @@ int pop(struct tower *tower) {
   return val;
 }
 
+// push a new ring (without error checking)
 void push(struct tower *tower, int val) {
   tower->stack[tower->size] = val;
   tower->size++;
 }
 
+// make the only valid move between a/b
 void move(struct tower *a, struct tower *b) {
   if (peek(a) > peek(b)) {
     push(a, pop(b));
