@@ -90,7 +90,7 @@ print_all:
   call print_tower
   lea -128(%rbp), %rdi
   call print_tower
-  lea -196(%rbp), %rdi
+  lea -192(%rbp), %rdi
   call print_tower
   call print_newline
   ret
@@ -161,18 +161,38 @@ init_s:
   movl $1, %eax
   shl %cl, %rax
   dec %eax
+
+  mov %rax, %r14
+  mov $0, %r15
   push %rax
 
 solve_loop:
   lea -64(%rbp), %rdi
+  lea -192(%rbp), %rsi
+  call move_tower
+
+  inc %r15
+  cmp %r14, %r15
+  jge leave_solve
+
+  lea -64(%rbp), %rdi
   lea -128(%rbp), %rsi
   call move_tower
 
-  lea -64(%rbp), %rdi
-  lea -196(%rbp), %rsi
+  inc %r15
+  cmp %r14, %r15
+  jge leave_solve
+
+  lea -192(%rbp), %rdi
+  lea -128(%rbp), %rsi
   call move_tower
 
-foo:
+  inc %r15
+  cmp %r14, %r15
+  jge leave_solve
+  jmp solve_loop
+
+leave_solve:
   lea 8(%rbp), %rsp             # fix the stack
   ret
 
