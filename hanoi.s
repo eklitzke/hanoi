@@ -2,8 +2,7 @@
 
   .data
   .set TOWER_ELEMS, 11
-	.set TOWER_SIZE, 44
-  .set N, 3
+  .set TOWER_SIZE, 44
 space:   .ascii " "
 newline:   .ascii "\n"
 
@@ -13,7 +12,7 @@ newline:   .ascii "\n"
 init_tower:
   xor %rax, %rax                # zero %rax
   movl $11, %ecx
-  rep stosq
+  rep stosw
   ret
 
 print_one:
@@ -29,7 +28,7 @@ print_space:
   call print_one
   mov $space, %rdi
   call print_one
-	pop %rcx
+  pop %rcx
   ret
 
 print_newline:
@@ -68,7 +67,9 @@ print_all:
   call print_newline
   ret
 
-_start:
+  ## Args: number of rings
+solve:
+  push %rdi
   mov %rsp, %rbp
 
   // S tower
@@ -78,17 +79,18 @@ _start:
 
   // A tower
   sub $64, %rsp
-	mov %rsp, %rdi
-	call init_tower
+  mov %rsp, %rdi
+  call init_tower
 
   // D tower
   sub $64, %rsp
-	mov %rsp, %rdi
-	call init_tower
+  mov %rsp, %rdi
+  call init_tower
 
+fill_tower:
   // initialize S tower
   lea -64(%rbp), %rax
-  mov $N, %rcx
+  mov (%rbp),%rcx
   mov %rcx, (%rax)                # set the size of the tower
   add $4, %rax
 init_s:
@@ -98,6 +100,12 @@ init_s:
 
   // print the towers
   call print_all
+  lea 8(%rbp), %rsp
+  ret
+
+_start:
+  movl $3, %edi
+  call solve
 
   mov $60, %rax                 # SYS_exit
   xor %rdi, %rdi
