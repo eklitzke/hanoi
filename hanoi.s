@@ -30,7 +30,7 @@ peek_empty:
 pop_tower:
   movl (%rdi),%ebx
   dec %ebx
- 	movl 4(%rdi, %rbx, 4), %eax   # copy the value to %rax
+   movl 4(%rdi, %rbx, 4), %eax   # copy the value to %rax
   movl $0, 4(%rdi, %rbx, 4)     # zero the value
   mov %ebx, (%rdi)              # decrease count
   ret
@@ -106,7 +106,10 @@ move_tower:
   cmp %rax, %r10
   jl less_branch
 greater_branch:
-  int3
+  // swap rsi and rdi
+  mov %rdi, %rax
+  mov %rsi, %rdi
+  mov %rax, %rsi
 less_branch:
   // source is rdi, dest is rsi
   call pop_tower
@@ -117,7 +120,7 @@ less_branch:
   call push_tower
   pop %rsi
   pop %rdi
-  ret
+  jmp print_all
 
 ### %rdi is the number of rings
 solve:
@@ -165,7 +168,9 @@ solve_loop:
   lea -128(%rbp), %rsi
   call move_tower
 
-  call print_all
+  lea -64(%rbp), %rdi
+  lea -196(%rbp), %rsi
+  call move_tower
 
 foo:
   lea 8(%rbp), %rsp             # fix the stack
