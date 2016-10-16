@@ -1,8 +1,6 @@
   .globl _start
 
   .data
-  .set TOWER_ELEMS, 11
-  .set TOWER_SIZE, 44
 space:   .ascii " "
 newline:   .ascii "\n"
 
@@ -30,7 +28,7 @@ peek_empty:
 pop_tower:
   movl (%rdi),%ebx
   dec %ebx
-   movl 4(%rdi, %rbx, 4), %eax   # copy the value to %rax
+  movl 4(%rdi, %rbx, 4), %eax   # copy the value to %rax
   movl $0, 4(%rdi, %rbx, 4)     # zero the value
   mov %ebx, (%rdi)              # decrease count
   ret
@@ -67,10 +65,10 @@ print_newline:
 print_tower:
   movl (%rdi), %ecx             # prepare to loop
   cmpl $0, %ecx
-  jz finish_print_tower
+  jz .finish_print_tower
   add $4, %rdi                  # point %rdi to data array
   sub $8, %rsp                  # allocate stack space
-print_tower_loop:
+.print_tower_loop:
   movl (%rdi), %eax             # copy int to %rax
   addl $'0', %eax               # turn %rax into ascii
   mov %rax, (%rsp)              # copy the int to the stack
@@ -79,18 +77,30 @@ print_tower_loop:
   call print_space
   add $4, %rbx
   mov %rbx, %rdi
-  loop print_tower_loop
+  loop .print_tower_loop
   add $8, %rsp                  # deallocate stack space
-finish_print_tower:
+.finish_print_tower:
   call print_newline
   ret
 
 print_all:
+  mov (%rbp), %rax
+  andl $1, %eax
+  jz print_even
   lea -64(%rbp), %rdi
   call print_tower
   lea -128(%rbp), %rdi
   call print_tower
   lea -192(%rbp), %rdi
+  call print_tower
+  call print_newline
+  ret
+print_even:
+  lea -64(%rbp), %rdi
+  call print_tower
+  lea -196(%rbp), %rdi
+  call print_tower
+  lea -128(%rbp), %rdi
   call print_tower
   call print_newline
   ret
@@ -148,10 +158,10 @@ solve:
   mov %rcx, (%rax)              # set the size of the tower
   add $4, %rax
 
-init_s:
+.init_s:
   mov %rcx, (%rax)
   add $4, %rax
-  loop init_s
+  loop .init_s
 
   call print_all                # print them all
 
@@ -166,14 +176,14 @@ init_s:
   mov $0, %r15
   push %rax
 
-solve_loop:
+.solve_loop:
   lea -64(%rbp), %rdi
   lea -192(%rbp), %rsi
   call move_tower
 
   inc %r15
   cmp %r14, %r15
-  jge leave_solve
+  jge .leave_solve
 
   lea -64(%rbp), %rdi
   lea -128(%rbp), %rsi
@@ -181,7 +191,7 @@ solve_loop:
 
   inc %r15
   cmp %r14, %r15
-  jge leave_solve
+  jge .leave_solve
 
   lea -192(%rbp), %rdi
   lea -128(%rbp), %rsi
@@ -189,15 +199,21 @@ solve_loop:
 
   inc %r15
   cmp %r14, %r15
-  jge leave_solve
-  jmp solve_loop
+  jge .leave_solve
+  jmp .solve_loop
 
-leave_solve:
+.leave_solve:
   lea 8(%rbp), %rsp             # fix the stack
   ret
 
 _start:
-  movl $3, %edi
+  movl $3, %edi                 # 3 rings by default
+  cmpl $1, (%rsp)               # compare argc, 1
+  jle .solve
+  mov 16(%rsp), %rax            # store argv[1] into %rax
+  movsbl (%rax), %edi           # store argv[1][0] into %edi
+  subl $'0', %edi               # convert to integer
+.solve:
   call solve
 
   mov $60, %rax                 # SYS_exit
