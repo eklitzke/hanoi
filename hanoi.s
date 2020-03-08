@@ -91,7 +91,7 @@ print_all:
   lea -64(%rbp), %rdi
   call print_tower
   lea -128(%rbp), %rdi
-  call print_tower
+  call print_towertake
   lea -192(%rbp), %rdi
   call print_tower
   call print_newline
@@ -99,7 +99,7 @@ print_all:
 print_even:
   lea -64(%rbp), %rdi
   call print_tower
-  lea -196(%rbp), %rdi
+  lea -192(%rbp), %rdi
   call print_tower
   lea -128(%rbp), %rdi
   call print_tower
