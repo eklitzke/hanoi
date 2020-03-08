@@ -99,7 +99,7 @@ print_all:
 print_even:
   lea -64(%rbp), %rdi
   call print_tower
-  lea -196(%rbp), %rdi
+  lea -192(%rbp), %rdi
   call print_tower
   lea -128(%rbp), %rdi
   call print_tower
